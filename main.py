@@ -3,29 +3,30 @@ from langchain_openai import OpenAI
 from langchain.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 
-prompt_template = PromptTemplate.from_template(
+prompt_esp = ChatPromptTemplate.from_template(
     "Summarize the following text, the result has to be translated into Spanish"
 )
 
-Prompt = prompt_template.format()
 
 def generate_response(txt):
     llm = OpenAI(
         temperature=0,
         openai_api_key=openai_api_key
     )
+    llm_esp = prompt_esp | llm | StrOutputParser()
     text_splitter = CharacterTextSplitter()
     texts = text_splitter.split_text(txt)
     docs = [Document(page_content=t) for t in texts]
     chain = load_summarize_chain(
-        llm,
+        llm_esp,
         chain_type="map_reduce"
     )
-    chain_esp = Prompt | chain
-    return chain_esp.run(docs)
+
+    return chain.run(docs)
 
 st.set_page_config(
     page_title = "Resumir texto"

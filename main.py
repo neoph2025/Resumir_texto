@@ -17,16 +17,17 @@ def generate_response(txt):
         temperature=0,
         openai_api_key=openai_api_key
     )
-    llm_esp = prompt_esp | llm | StrOutputParser()
+
     text_splitter = CharacterTextSplitter()
     texts = text_splitter.split_text(txt)
     docs = [Document(page_content=t) for t in texts]
     chain = load_summarize_chain(
-        llm_esp,
+        llm,
         chain_type="map_reduce"
     )
+    chain_esp= prompt_esp | chain
 
-    return chain.run(docs)
+    return chain_esp.run(docs)
 
 st.set_page_config(
     page_title = "Resumir texto"
@@ -54,3 +55,4 @@ with st.form("summarize_form", clear_on_submit=True):
 
 if len(result):
     st.info(response)
+

@@ -3,6 +3,14 @@ from langchain_openai import OpenAI
 from langchain.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
+from langchain_core.prompts import PromptTemplate
+
+
+prompt_template = PromptTemplate.from_template(
+    "Summarize the following text, the result has to be translated into Spanish"
+)
+
+Prompt = prompt_template.format()
 
 def generate_response(txt):
     llm = OpenAI(
@@ -16,15 +24,16 @@ def generate_response(txt):
         llm,
         chain_type="map_reduce"
     )
-    return chain.run(docs)
+    chain_esp = Prompt | chain
+    return chain_esp.run(docs)
 
 st.set_page_config(
-    page_title = "Writing Text Summarization"
+    page_title = "Resumir texto"
 )
-st.title("Writing Text Summarization")
+st.title("Resumir texto")
 
 txt_input = st.text_area(
-    "Enter your text",
+    "Introduce tu texto",
     "",
     height=200
 )
@@ -36,7 +45,7 @@ with st.form("summarize_form", clear_on_submit=True):
         type="password",
         disabled=not txt_input
     )
-    submitted = st.form_submit_button("Submit")
+    submitted = st.form_submit_button("Resumir")
     if submitted and openai_api_key.startswith("sk-"):
         response = generate_response(txt_input)
         result.append(response)
